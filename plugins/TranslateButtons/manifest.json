@@ -1,0 +1,14 @@
+{
+  "name": "TranslateButtons",
+  "description": "Translate messages to English",
+  "authors": [
+    {
+      "name": "knifeswx",
+      "id": "knifeswx"
+    }
+  ],
+  "main": "src/index.ts",
+  "vendetta": {
+    "icon": "ic_locale_24px"
+  }
+}
