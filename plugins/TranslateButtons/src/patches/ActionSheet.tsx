@@ -11,7 +11,10 @@ import { GTranslate } from "../api"
 import { showToast } from "@vendetta/ui/toasts"
 import { logger } from "@vendetta"
 
+console.log("TranslateButtons: Loading ActionSheet patch...")
+
 const LazyActionSheet = findByProps("openLazy", "hideActionSheet")
+console.log("TranslateButtons: LazyActionSheet found:", !!LazyActionSheet)
 const ActionSheetRow = findByProps("ActionSheetRow")?.ActionSheetRow ?? Forms.FormRow
 const MessageStore = findByStoreName("MessageStore")
 const ChannelStore = findByStoreName("ChannelStore")
