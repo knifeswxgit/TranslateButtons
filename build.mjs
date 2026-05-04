@@ -3,6 +3,8 @@ import { join } from "path";
 import { createHash } from "crypto";
 import { rollup } from "rollup";
 import esbuild from "rollup-plugin-esbuild";
+import commonjs from "@rollup/plugin-commonjs";
+import nodeResolve from "@rollup/plugin-node-resolve";
 
 const pluginsDir = "./plugins";
 const outDir = "./dist";
@@ -30,43 +32,41 @@ for (const dirent of pluginFolders) {
     input: join(pluginPath, entry),
     external: (id) => {
       if (id.startsWith("@vendetta")) return true;
-      if (id.startsWith("react-native")) return true;
-      if (id === "react") return true;
-      if (id.includes("ApplicationCommandTypes")) return true;
+      if (id === "react" || id === "react-native") return true;
       return false;
     },
-    plugins: [esbuild({ 
-      minify: false,
-      target: "es2020",
-      format: "iife",
-      platform: "browser",
-      treeShaking: true,
-      define: {
-        "process.env.NODE_ENV": '"production"'
-      }
-    })],
+    plugins: [
+      nodeResolve({ extensions: [".js", ".jsx", ".ts", ".tsx", ".mjs"] }),
+      commonjs(),
+      esbuild({
+        minify: false,
+        target: "es2020",
+        jsx: "react",
+      }),
+    ],
     onwarn(warning, warn) {
-      if (warning.code === 'CIRCULAR_DEPENDENCY') return;
+      if (warning.code === "CIRCULAR_DEPENDENCY") return;
       warn(warning);
-    }
+    },
   });
-  
-  const { output } = await bundle.generate({
+
+  await bundle.write({
+    file: join(outPluginDir, "index.js"),
     format: "iife",
     name: pluginName,
-    exports: "named",
     globals(id) {
-      if (id.startsWith("@vendetta")) {
-        const name = id.replace("@vendetta/", "").replace("/", ".");
-        return `vendetta.${name}`;
-      }
       if (id === "react") return "React";
       if (id === "react-native") return "ReactNative";
-      return `window.${id}`;
-    }
+      if (id.startsWith("@vendetta/")) {
+        const path = id.slice(10);
+        const parts = path.split("/");
+        return `vendetta.${parts.join(".")}`;
+      }
+      if (id === "@vendetta") return "vendetta";
+      return id;
+    },
   });
-  
-  await writeFile(join(outPluginDir, "index.js"), output[0].code);
+
   await bundle.close();
 
   const toHash = await readFile(join(outPluginDir, "index.js"));
