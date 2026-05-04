@@ -1,13 +1,10 @@
 import { getAssetIDByName } from "@vendetta/ui/assets"
-import { React, ReactNative, stylesheet, constants, NavigationNative, url } from "@vendetta/metro/common"
+import { React, ReactNative, stylesheet, constants, manifest } from "@vendetta/metro/common"
 import { semanticColors } from "@vendetta/ui"
 import { Forms } from "@vendetta/ui/components"
-import { manifest } from "@vendetta/plugin"
 import { useProxy } from "@vendetta/storage"
 
 import { settings } from ".."
-import TargetLang from "./TargetLang"
-import TranslatorPage from "./TranslatorPage"
 
 const { ScrollView, Text } = ReactNative
 const { FormRow, FormSwitchRow } = Forms
@@ -25,7 +22,6 @@ const styles = stylesheet.createThemedStyleSheet({
 })
 
 export default () => {
-    const navigation = NavigationNative.useNavigation()
     useProxy(settings)
 
     return (
@@ -39,30 +35,8 @@ export default () => {
                     settings.immersive_enabled = v
                 }}
             />
-
-            <FormRow
-                label={"Translate to"}
-                subLabel={settings.target_lang?.toLowerCase()}
-                leading={<FormRow.Icon source={getAssetIDByName("ic_activity_24px")} />}
-                trailing={() => <FormRow.Arrow />}
-                onPress={() => navigation.push("VendettaCustomPage", {
-                    title: "Translate to",
-                    render: TargetLang,
-                })}
-            />
-            <FormRow
-                label={"Translator"}
-                subLabel={settings.translator ? "Google Translate" : "DeepL"}
-                leading={<FormRow.Icon source={getAssetIDByName("ic_locale_24px")} />}
-                trailing={() => <FormRow.Arrow />}
-                onPress={() => navigation.push("VendettaCustomPage", {
-                    title: "Translator",
-                    render: TranslatorPage,
-                })}
-            />
-
             <Text style={styles.subheaderText}>
-                {`Build: (${manifest.hash?.substring(0, 7) || "dev"})`}
+                Translate to English via /tswx
             </Text>
         </ScrollView>
     )

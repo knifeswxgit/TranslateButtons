@@ -7,7 +7,7 @@ import { Forms } from "@vendetta/ui/components"
 import { findInReactTree } from "@vendetta/utils"
 import { settings } from ".."
 
-import { DeepL, GTranslate } from "../api"
+import { GTranslate } from "../api"
 import { showToast } from "@vendetta/ui/toasts"
 import { logger } from "@vendetta"
 
@@ -16,6 +16,7 @@ const ActionSheetRow = findByProps("ActionSheetRow")?.ActionSheetRow ?? Forms.Fo
 const MessageStore = findByStoreName("MessageStore")
 const ChannelStore = findByStoreName("ChannelStore")
 const separator = "\n"
+const target_lang = "en"
 
 const styles = stylesheet.createThemedStyleSheet({
     iconComponent: {
@@ -54,7 +55,6 @@ export default () => before("openLazy", LazyActionSheet, ([component, key, msg])
             const translate = async () => {
                 LazyActionSheet.hideActionSheet()
                 try {
-                    const target_lang = settings.target_lang
                     const isTranslated = translateType === "Translate"
                     const isImmersive = settings.immersive_enabled
                     
@@ -66,15 +66,8 @@ export default () => before("openLazy", LazyActionSheet, ([component, key, msg])
                         placeholders.push(match)
                         return ` [[${placeholders.length - 1}]] `
                     })
-                    var translateResult
-                    switch(settings.translator) {
-                        case 0:
-                            translateResult = await DeepL.translate(textToTranslate, undefined, target_lang, !isTranslated)
-                            break
-                        case 1:
-                            translateResult = await GTranslate.translate(textToTranslate, undefined, target_lang, !isTranslated)
-                            break
-                    }
+                    
+                    const translateResult = await GTranslate.translate(textToTranslate, undefined, target_lang, !isTranslated)
                     
                     let translatedText = translateResult.text
                     placeholders.forEach((original, index) => {
@@ -84,8 +77,8 @@ export default () => before("openLazy", LazyActionSheet, ([component, key, msg])
 
                     const finalContent = isTranslated
                                 ? (isImmersive
-                                    ? `${messageContent}${separator}${translatedText.trim()} \`[${target_lang?.toLowerCase()}]\``
-                                    : `${translatedText.trim()} \`[${target_lang?.toLowerCase()}]\``)
+                                    ? `${messageContent}${separator}${translatedText.trim()} \`[en]\``
+                                    : `${translatedText.trim()} \`[en]\``)
                                 : (existingCachedObject as object)[messageId]
                     FluxDispatcher.dispatch({
                         type: "MESSAGE_UPDATE",

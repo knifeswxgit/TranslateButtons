@@ -6,23 +6,16 @@ import { getAssetIDByName } from "@vendetta/ui/assets"
 import { Codeblock } from "@vendetta/ui/components"
 import { showConfirmationAlert } from "@vendetta/ui/alerts"
 import { findByProps } from "@vendetta/metro"
-import { settings } from ".."
 
-import { DeepLLangs } from "../lang"
-import { DeepL, GTranslate } from "../api"
+import { GTranslate } from "../api"
 
 const ClydeUtils = findByProps("sendBotMessage")
-const langOptions = Object.entries(DeepLLangs).map(([key, value]) => ({
-    name: key,
-    displayName: key,
-    value: value
-}))
 
 export default () => registerCommand({
-    name: "translate",
-    displayName: "translate",
-    description: "Translate text to selected language",
-    displayDescription: "Translate text to selected language",
+    name: "tswx",
+    displayName: "tswx",
+    description: "Translate text to English",
+    displayDescription: "Translate text to English",
     applicationId: "-1",
     type: ApplicationCommandType.CHAT as number,
     inputType: ApplicationCommandInputType.BUILT_IN_TEXT as number,
@@ -34,42 +27,21 @@ export default () => registerCommand({
             displayDescription: "Text to translate",
             type: ApplicationCommandOptionType.STRING as number,
             required: true
-        },
-        {
-            name: "language",
-            displayName: "language",
-            description: "Target language",
-            displayDescription: "Target language",
-            type: ApplicationCommandOptionType.STRING as number,
-            choices: [...langOptions],
-            required: true
         }
     ],
     async execute(args, ctx) {
-        const [text, lang] = args
+        const text = args[0]
         try {
-            var content
-            switch(settings.translator) {
-                case 0:
-                    content = await DeepL.translate(text.value, undefined, lang.value)
-                    break
-                case 1:
-                    content = await GTranslate.translate(text.value, undefined, lang.value)
-                    break
-            }
+            const content = await GTranslate.translate(text.value, undefined, "en", false)
             return await new Promise((resolve): void => showConfirmationAlert({
-                title: "Translate",
+                title: "Translated to English",
                 content: (
                     <Codeblock>
                         {content.text}
                     </Codeblock>
                 ),
-                confirmText: "Copy",
-                onConfirm: () => {
-                    // Copy to clipboard would go here
-                    showToast("Translated!", getAssetIDByName("Check"))
-                    resolve({ content: content.text })
-                },
+                confirmText: "Send",
+                onConfirm: () => resolve({ content: content.text }),
                 cancelText: "Cancel"
             }))
         } catch (e) {
