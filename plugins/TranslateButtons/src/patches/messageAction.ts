@@ -28,7 +28,11 @@ const styles = stylesheet.createThemedStyleSheet({
 
 export default function patchMessageAction() {
   const MessageModule = findByProps("MessageContent", "Message", "default");
-  if (!MessageModule) return () => {};
+  if (!MessageModule) {
+    logger.warn("TranslateButtons: MessageModule not found");
+    return () => {};
+  }
+  logger.info("TranslateButtons: MessageModule found");
 
   let unpatch: any = null;
 

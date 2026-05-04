@@ -25,7 +25,11 @@ const styles = stylesheet.createThemedStyleSheet({
 
 export default function patchInputAction() {
   const ChatInputModule = findByProps("ChatInput", "ChannelTextArea");
-  if (!ChatInputModule) return () => {};
+  if (!ChatInputModule) {
+    logger.warn("TranslateButtons: ChatInputModule not found");
+    return () => {};
+  }
+  logger.info("TranslateButtons: ChatInputModule found");
 
   let textInputRef: any = null;
   let button: any = null;
