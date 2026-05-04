@@ -1,5 +1,5 @@
 import { readFile, writeFile, readdir, mkdir } from "fs/promises";
-import { extname, join } from "path";
+import { join } from "path";
 import { createHash } from "crypto";
 import { rollup } from "rollup";
 import esbuild from "rollup-plugin-esbuild";
@@ -31,7 +31,7 @@ for (const dirent of pluginFolders) {
     external: (id) => {
       if (id.startsWith("@vendetta")) return true;
       if (id.startsWith("react-native")) return true;
-      if (id.startsWith("react")) return true;
+      if (id === "react") return true;
       if (id.includes("ApplicationCommandTypes")) return true;
       return false;
     },
@@ -39,18 +39,34 @@ for (const dirent of pluginFolders) {
       minify: false,
       target: "es2020",
       format: "iife",
+      platform: "browser",
+      treeShaking: true,
       define: {
         "process.env.NODE_ENV": '"production"'
       }
     })],
+    onwarn(warning, warn) {
+      if (warning.code === 'CIRCULAR_DEPENDENCY') return;
+      warn(warning);
+    }
   });
   
-  await bundle.write({
-    file: join(outPluginDir, "index.js"),
+  const { output } = await bundle.generate({
     format: "iife",
     name: pluginName,
     exports: "named",
+    globals(id) {
+      if (id.startsWith("@vendetta")) {
+        const name = id.replace("@vendetta/", "").replace("/", ".");
+        return `vendetta.${name}`;
+      }
+      if (id === "react") return "React";
+      if (id === "react-native") return "ReactNative";
+      return `window.${id}`;
+    }
   });
+  
+  await writeFile(join(outPluginDir, "index.js"), output[0].code);
   await bundle.close();
 
   const toHash = await readFile(join(outPluginDir, "index.js"));
