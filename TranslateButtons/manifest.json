@@ -7,8 +7,9 @@
       "id": "000000000000000000"
     }
   ],
-  "main": "src/index.ts",
+  "main": "index.js",
   "vendetta": {
     "icon": "ic_locale_24px"
-  }
+  },
+  "hash": "f587386f5631096e198a97f1a4241b0135db816340ae9e3cfec294ff0876763a"
 }
