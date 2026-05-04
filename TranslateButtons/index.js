@@ -1,2 +1,53 @@
-(function(E,re,U,ie,oe,V,w,e,k,H,T,M,se,le,ce,ue){"use strict";var de=(function(){var r=U(function(a){var s,l,u,t,g,i,F,f,m,o=arguments;return V(this,function(n){switch(n.label){case 0:s=o.length>1&&o[1]!==void 0?o[1]:"auto",l=o.length>2?o[2]:void 0,u=o.length>3&&o[3]!==void 0?o[3]:!1,n.label=1;case 1:return n.trys.push([1,4,,5]),t={},u?[2,(t.source_lang=s,t.text=a,t)]:(i={},g="https://translate.googleapis.com/translate_a/single?"+new URLSearchParams((i.client="gtx",i.sl=s,i.tl=l,i.dt="t",i.dj="1",i.source="input",i.q=a,i)),[4,fetch(g)]);case 2:return[4,n.sent().json()];case 3:return F=n.sent(),f={},[2,(f.source_lang=s,f.text=F.sentences.map(function(_){return _.trans}).join(""),f)];case 4:throw m=n.sent(),Error("Failed to fetch from Google Translate: ".concat(m));case 5:return[2]}})});return function(a){return r.apply(this,arguments)}})(),ve={translate:de},L;console.log("TranslateButtons: Loading ActionSheet patch...");var C=w.findByProps("openLazy","hideActionSheet");console.log("TranslateButtons: LazyActionSheet found:",!!C);var D,Y=(D=(L=w.findByProps("ActionSheetRow"))===null||L===void 0?void 0:L.ActionSheetRow)!==null&&D!==void 0?D:M.Forms.FormRow,ge=w.findByStoreName("MessageStore"),he=w.findByStoreName("ChannelStore"),fe=`
-`,me=e.stylesheet.createThemedStyleSheet({iconComponent:{width:24,height:24,tintColor:H.semanticColors.INTERACTIVE_NORMAL}}),I=[];function pe(){return k.before("openLazy",C,function(r){var a=oe(r,3),s=a[0],l=a[1],u=a[2],t=u?.message;l!=="MessageLongPressActionSheet"||!t||s.then(function(g){var i=k.after("default",g,function(F,f){e.React.useEffect(function(){return function(){i()}},[]);var m=se.findInReactTree(f,function(c){var d,y;return(c==null||(d=c[0])===null||d===void 0||(y=d.type)===null||y===void 0?void 0:y.name)==="ActionSheetRow"});if(m){var o=Math.max(m.findIndex(function(c){return c.props.message===e.i18n.Messages.MARK_UNREAD}),0),n=ge.getMessage(t.channel_id,t.id);if(!(!n?.content&&!t.content)){var _,x=(_=n?.id)!==null&&_!==void 0?_:t.id,P,j=(P=n?.content)!==null&&P!==void 0?P:t.content,z=I.find(function(c){return Object.keys(c)[0]===x}),O=z?"Revert":"Translate",J=O==="Translate"?T.getAssetIDByName("LanguageIcon"):T.getAssetIDByName("ic_highlight"),we=(function(){var c=U(function(){var d,y,B,X,Z,N,G,ee,b,te,R,ne,ae;return V(this,function(S){switch(S.label){case 0:C.hideActionSheet(),S.label=1;case 1:return S.trys.push([1,3,,4]),y="en",B=O==="Translate",X=v.immersive_enabled,n?(Z=/<(a?):\w+:\d+>|<@!?\d+>|<#\d+>/g,N=[],G=j.replace(Z,function(A){return N.push(A)," [[".concat(N.length-1,"]] ")}),console.log("Translating with GTranslate: ",G),[4,ve.translate(G,void 0,y,!B)]):[2];case 2:return ee=S.sent(),b=ee.text,N.forEach(function(A,Te){var Ie=new RegExp("\\[\\[\\s*".concat(Te,"\\s*\\]\\]"),"g");b=b.replace(Ie,A)}),te=B?X?"".concat(j).concat(fe).concat(b.trim()," `[en]`"):"".concat(b.trim()," `[en]`"):z[x],R={},e.FluxDispatcher.dispatch((R.type="MESSAGE_UPDATE",R.message={id:x,channel_id:n.channel_id,guild_id:(d=he.getChannel(n.channel_id))===null||d===void 0?void 0:d.guild_id,content:te},R.log_edit=!1,R.otherPluginBypass=!0,R)),ne={},B?I.unshift(ie(ne,x,j)):I=I.filter(function(A){return A!==z}),[3,4];case 3:return ae=S.sent(),ce.showToast("Failed to translate message.",T.getAssetIDByName("Small")),ue.logger.error(ae),[3,4];case 4:return[2]}})});return function(){return c.apply(this,arguments)}})();m.splice(o,0,e.React.createElement(Y,{label:"".concat(O," Message"),icon:e.React.createElement(Y.Icon,{source:J,IconComponent:function(){return e.React.createElement(e.ReactNative.Image,{resizeMode:"cover",style:me.iconComponent,source:J})}}),onPress:we}))}}})})})}var ye=e.ReactNative.ScrollView,Re=e.ReactNative.Text,_e=M.Forms.FormRow,be=M.Forms.FormSwitchRow,Se=e.stylesheet.createThemedStyleSheet({subheaderText:{color:H.semanticColors.HEADER_SECONDARY,textAlign:"center",margin:10,marginBottom:50,letterSpacing:.25,fontFamily:e.constants.Fonts.PRIMARY_BOLD,fontSize:14}});function Ae(){le.useProxy(v);var r;return e.React.createElement(ye,null,e.React.createElement(be,{label:"Immersive Translation",subLabel:"Display both original and translation",leading:e.React.createElement(_e.Icon,{source:T.getAssetIDByName("ic_chat_bubble_filled_24px")}),value:(r=v.immersive_enabled)!==null&&r!==void 0?r:!0,onValueChange:function(a){v.immersive_enabled=a}}),e.React.createElement(Re,{style:Se.subheaderText},"Translate to English via /tswx"))}var q,v=re.storage,K;(K=(q=v).immersive_enabled)!==null&&K!==void 0||(q.immersive_enabled=!0);var $=[],Ee={onLoad:function(){$=[pe()]},onUnload:function(){var r=!0,a=!1,s=void 0;try{for(var l=$[Symbol.iterator](),u;!(r=(u=l.next()).done);r=!0){var t=u.value;t&&t()}}catch(g){a=!0,s=g}finally{try{!r&&l.return!=null&&l.return()}finally{if(a)throw s}}},settings:Ae};return E.default=Ee,E.settings=v,Object.defineProperty(E,"__esModule",{value:!0}),E})({},vendetta.plugin,p,Q,W,h,vendetta.metro,vendetta.metro.common,vendetta.patcher,vendetta.ui,vendetta.ui.assets,vendetta.ui.components,vendetta.utils,vendetta.storage,vendetta.ui.toasts,vendetta);
+(function () {
+    'use strict';
+
+    (() => {
+      var __create = Object.create;
+      var __defProp = Object.defineProperty;
+      var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+      var __getOwnPropNames = Object.getOwnPropertyNames;
+      var __getProtoOf = Object.getPrototypeOf;
+      var __hasOwnProp = Object.prototype.hasOwnProperty;
+      var __copyProps = (to, from, except, desc) => {
+        if (from && typeof from === "object" || typeof from === "function") {
+          for (let key of __getOwnPropNames(from))
+            if (!__hasOwnProp.call(to, key) && key !== except)
+              __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+        }
+        return to;
+      };
+      var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+        // If the importer is in node compatibility mode or this is not an ESM
+        // file that has been converted to a CommonJS file using a Babel-
+        // compatible transform (i.e. "__esModule" has not been set), then set
+        // "default" to the CommonJS "module.exports" for node compatibility.
+        isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+        mod
+      ));
+      var import_plugin = require("@vendetta/plugin");
+      var import_ActionSheet = __toESM(require("./patches/ActionSheet"));
+      var import_settings = __toESM(require("./settings"));
+      const settings = import_plugin.storage;
+      if (settings.immersive_enabled === void 0) {
+        settings.immersive_enabled = true;
+      }
+      let unpatchActionSheet = null;
+      ({
+        onLoad: () => {
+          console.log("TranslateButtons: Loading...");
+          try {
+            unpatchActionSheet = (0, import_ActionSheet.default)();
+            console.log("TranslateButtons: Loaded OK");
+          } catch (e) {
+            console.log("TranslateButtons: Error loading patch:", e?.message || e);
+          }
+        },
+        onUnload: () => {
+          console.log("TranslateButtons: Unloading...");
+          if (unpatchActionSheet) unpatchActionSheet();
+        },
+        settings: import_settings.default
+      });
+    })();
+
+})();
