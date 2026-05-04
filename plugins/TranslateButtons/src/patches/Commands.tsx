@@ -1,6 +1,6 @@
 import { logger } from "@vendetta"
 import { registerCommand } from "@vendetta/commands"
-import { ApplicationCommandInputType, ApplicationCommandType, ApplicationCommandOptionType } from "../../../../ApplicationCommandTypes"
+import { ApplicationCommandInputType, ApplicationCommandType, ApplicationCommandOptionType } from "../ApplicationCommandTypes"
 import { showToast } from "@vendetta/ui/toasts"
 import { getAssetIDByName } from "@vendetta/ui/assets"
 import { Codeblock } from "@vendetta/ui/components"
