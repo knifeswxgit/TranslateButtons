@@ -1,27 +1,30 @@
-name: Build and deploy
+name: Deploy to GitHub Pages
 
 on:
-    push:
-        branches: [main]
+  push:
+    branches: [main]
 
 jobs:
-    deploy:
-        runs-on: ubuntu-latest
-        permissions:
-          contents: write
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
-        steps:
-            - uses: actions/checkout@v3
+    steps:
+      - uses: actions/checkout@v3
 
-            - name: Create 404 page
-              run: |
-                  printf -- "---\npermalink: /404.html\n---\n" > 404.md
-                  printf -- "> **Note:** You accessed a link that returned a 404. Copy the link address and add it into Vendetta.\n\n" >> 404.md
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
 
-            - name: Deploy to GitHub Pages
-              uses: peaceiris/actions-gh-pages@v3
-              with:
-                  github_token: ${{ secrets.GITHUB_TOKEN }}
-                  publish_dir: .
-                  enable_jekyll: true
-                  exclude_assets: '.git,.github'
+      - run: npm install -g pnpm
+
+      - run: pnpm install
+
+      - run: node build.mjs
+
+      - uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          enable_jekyll: false
