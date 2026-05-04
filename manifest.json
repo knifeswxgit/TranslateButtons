@@ -1,0 +1,14 @@
+{
+  "name": "TranslateButtons",
+  "description": "Adds translate buttons next to each message and in the text input.",
+  "authors": [
+    {
+      "name": "YourName",
+      "id": "123456789012345678"
+    }
+  ],
+  "main": "src/index.ts",
+  "vendetta": {
+    "icon": "ic_locale_24px"
+  }
+}
