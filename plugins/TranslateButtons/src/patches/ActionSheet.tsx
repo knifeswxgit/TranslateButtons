@@ -12,12 +12,10 @@ import { showToast } from "@vendetta/ui/toasts"
 import { logger } from "@vendetta"
 
 const LazyActionSheet = findByProps("openLazy", "hideActionSheet")
-if (!LazyActionSheet) logger.warn("TranslateButtons: LazyActionSheet not found")
 const ActionSheetRow = findByProps("ActionSheetRow")?.ActionSheetRow ?? Forms.FormRow
 const MessageStore = findByStoreName("MessageStore")
 const ChannelStore = findByStoreName("ChannelStore")
 const separator = "\n"
-const target_lang = "en"
 
 const styles = stylesheet.createThemedStyleSheet({
     iconComponent: {
@@ -56,6 +54,7 @@ export default () => before("openLazy", LazyActionSheet, ([component, key, msg])
             const translate = async () => {
                 LazyActionSheet.hideActionSheet()
                 try {
+                    const target_lang = "en"
                     const isTranslated = translateType === "Translate"
                     const isImmersive = settings.immersive_enabled
                     
@@ -68,6 +67,7 @@ export default () => before("openLazy", LazyActionSheet, ([component, key, msg])
                         return ` [[${placeholders.length - 1}]] `
                     })
                     
+                    console.log("Translating with GTranslate: ", textToTranslate)
                     const translateResult = await GTranslate.translate(textToTranslate, undefined, target_lang, !isTranslated)
                     
                     let translatedText = translateResult.text

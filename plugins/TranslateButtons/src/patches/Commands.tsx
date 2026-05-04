@@ -1,6 +1,6 @@
 import { logger } from "@vendetta"
 import { registerCommand } from "@vendetta/commands"
-import { ApplicationCommandInputType, ApplicationCommandType, ApplicationCommandOptionType } from "ApplicationCommandTypes"
+import { ApplicationCommandInputType, ApplicationCommandType, ApplicationCommandOptionType } from "../../../../ApplicationCommandTypes"
 import { showToast } from "@vendetta/ui/toasts"
 import { getAssetIDByName } from "@vendetta/ui/assets"
 import { Codeblock } from "@vendetta/ui/components"
@@ -10,11 +10,8 @@ import { findByProps } from "@vendetta/metro"
 import { GTranslate } from "../api"
 
 const ClydeUtils = findByProps("sendBotMessage")
-if (!ClydeUtils) logger.warn("TranslateButtons: ClydeUtils not found")
 
-export default () => {
-    logger.info("TranslateButtons: Registering /tswx command")
-    return registerCommand({
+export default () => registerCommand({
     name: "tswx",
     displayName: "tswx",
     description: "Translate text to English",
@@ -52,4 +49,4 @@ export default () => {
             return ClydeUtils?.sendBotMessage(ctx.channel.id, "Failed to translate.")
         }
     }
-})}
+})

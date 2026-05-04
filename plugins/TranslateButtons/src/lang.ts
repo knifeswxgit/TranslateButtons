@@ -41,5 +41,7 @@ export const GTranslateLangs = {
     "Korean": "ko",
     "Chinese": "zh",
     "Portuguese": "pt",
-    "Italian": "it"
+    "Italian": "it",
+    "Arabic": "ar",
+    "Hindi": "hi"
 } as const;
