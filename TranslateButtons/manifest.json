@@ -7,8 +7,9 @@
       "id": "knifeswx"
     }
   ],
-  "main": "src/index.ts",
+  "main": "index.js",
   "vendetta": {
     "icon": "ic_locale_24px"
-  }
+  },
+  "hash": "74f5aa1fcd4a9c986b118390d4c2a48f83fb324d1b7f701346cfb10452f0ce99"
 }
