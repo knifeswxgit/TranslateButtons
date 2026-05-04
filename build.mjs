@@ -1,13 +1,16 @@
 import { readFile, writeFile, readdir, mkdir } from "fs/promises";
-import { join } from "path";
+import { extname, join } from "path";
 import { createHash } from "crypto";
 import { rollup } from "rollup";
 import esbuild from "rollup-plugin-esbuild";
 import commonjs from "@rollup/plugin-commonjs";
 import nodeResolve from "@rollup/plugin-node-resolve";
+import swc from "@swc/core";
 
 const pluginsDir = "./plugins";
 const outDir = "./dist";
+
+const extensions = [".js", ".jsx", ".mjs", ".ts", ".tsx", ".cts", ".mts"];
 
 await mkdir(outDir, { recursive: true });
 
@@ -28,19 +31,45 @@ for (const dirent of pluginFolders) {
   const outPluginDir = join(outDir, pluginName);
   await mkdir(outPluginDir, { recursive: true });
 
+  const swcPlugin = {
+    name: "swc",
+    async transform(code, id) {
+      const ext = extname(id);
+      if (!extensions.includes(ext)) return null;
+      const ts = ext.includes("ts");
+      const tsx = ts ? ext.endsWith("x") : undefined;
+      const jsx = !ts ? ext.endsWith("x") : undefined;
+      const result = await swc.transform(code, {
+        filename: id,
+        jsc: {
+          externalHelpers: false,
+          parser: { syntax: ts ? "typescript" : "ecmascript", tsx, jsx },
+        },
+        env: {
+          targets: "ie 11",
+          include: [
+            "transform-block-scoping",
+            "transform-classes",
+            "transform-arrow-functions",
+            "transform-async-to-generator",
+            "transform-optional-chaining",
+            "transform-nullish-coalescing",
+          ],
+        },
+      });
+      return result.code;
+    },
+  };
+
   const bundle = await rollup({
     input: join(pluginPath, entry),
-    external: (id) => {
-      if (id.startsWith("@vendetta")) return true;
-      if (id === "react" || id === "react-native") return true;
-      return false;
-    },
     plugins: [
       nodeResolve({ extensions: [".js", ".jsx", ".ts", ".tsx", ".mjs"] }),
       commonjs(),
+      swcPlugin,
       esbuild({
         minify: false,
-        target: "es2020",
+        target: "es5",
         jsx: "transform",
         jsxFactory: "React.createElement",
         jsxFragment: "React.Fragment",
@@ -57,16 +86,13 @@ for (const dirent of pluginFolders) {
     format: "iife",
     name: pluginName,
     globals(id) {
+      if (id.startsWith("@vendetta")) return id.substring(1).replace(/\//g, ".");
       if (id === "react") return "React";
       if (id === "react-native") return "ReactNative";
-      if (id.startsWith("@vendetta/")) {
-        const path = id.slice(10);
-        const parts = path.split("/");
-        return `vendetta.${parts.join(".")}`;
-      }
-      if (id === "@vendetta") return "vendetta";
       return id;
     },
+    compact: false,
+    exports: "named",
   });
 
   await bundle.close();
