@@ -6,19 +6,22 @@ import { getAssetIDByName } from "@vendetta/ui/assets"
 import { Forms } from "@vendetta/ui/components"
 import { findInReactTree } from "@vendetta/utils"
 import { settings } from ".."
-
 import { GTranslate } from "../api"
 import { showToast } from "@vendetta/ui/toasts"
-import { logger } from "@vendetta"
 
-console.log("TranslateButtons: Loading ActionSheet patch...")
+console.log("TranslateButtons: ActionSheet patch initializing")
 
 const LazyActionSheet = findByProps("openLazy", "hideActionSheet")
-console.log("TranslateButtons: LazyActionSheet found:", !!LazyActionSheet)
+if (!LazyActionSheet) {
+    console.log("TranslateButtons: ERROR - LazyActionSheet not found")
+}
+
 const ActionSheetRow = findByProps("ActionSheetRow")?.ActionSheetRow ?? Forms.FormRow
 const MessageStore = findByStoreName("MessageStore")
 const ChannelStore = findByStoreName("ChannelStore")
+
 const separator = "\n"
+const targetLang = "en"
 
 const styles = stylesheet.createThemedStyleSheet({
     iconComponent: {
@@ -28,101 +31,100 @@ const styles = stylesheet.createThemedStyleSheet({
     }
 })
 
-let cachedData: object[] = []
+const cachedData: any[] = []
 
-export default () => before("openLazy", LazyActionSheet, ([component, key, msg]) => {
-    const message = msg?.message
-    if (key !== "MessageLongPressActionSheet" || !message) return
-    component.then(instance => {
-        const unpatch = after("default", instance, (_, component) => {
-            React.useEffect(() => () => { unpatch() }, [])
+export default function patchActionSheet() {
+    console.log("TranslateButtons: Patching ActionSheet")
+    
+    return before("openLazy", LazyActionSheet, function([component, key, msg]) {
+        const message = msg?.message
+        if (key !== "MessageLongPressActionSheet" || !message) return
+        
+        console.log("TranslateButtons: MessageLongPressActionSheet detected")
+        
+        component.then((instance: any) => {
+            const unpatch = after("default", instance, (_, component) => {
+                React.useEffect(() => () => { unpatch() }, [])
 
-            const buttons = findInReactTree(component, x => x?.[0]?.type?.name === "ActionSheetRow")
-            if (!buttons) return
-            const position = Math.max(buttons.findIndex((x: any) => x.props.message === i18n.Messages.MARK_UNREAD), 0)
-
-            const originalMessage = MessageStore.getMessage(
-                message.channel_id,
-                message.id
-            )
-            if (!originalMessage?.content && !message.content) return
-
-            const messageId = originalMessage?.id ?? message.id
-            const messageContent = originalMessage?.content ?? message.content
-            const existingCachedObject = cachedData.find((o: any) => Object.keys(o)[0] === messageId)
-
-            const translateType = existingCachedObject ? "Revert" : "Translate"
-            const icon = translateType === "Translate" ? getAssetIDByName("LanguageIcon") : getAssetIDByName("ic_highlight")
-
-            const translate = async () => {
-                LazyActionSheet.hideActionSheet()
-                try {
-                    const target_lang = "en"
-                    const isTranslated = translateType === "Translate"
-                    const isImmersive = settings.immersive_enabled
-                    
-                    if (!originalMessage) return
-
-                    const emojiRegex = /<(a?):\w+:\d+>|<@!?\d+>|<#\d+>/g
-                    const placeholders: string[] = []
-                    const textToTranslate = messageContent.replace(emojiRegex, (match) => {
-                        placeholders.push(match)
-                        return ` [[${placeholders.length - 1}]] `
-                    })
-                    
-                    console.log("Translating with GTranslate: ", textToTranslate)
-                    const translateResult = await GTranslate.translate(textToTranslate, undefined, target_lang, !isTranslated)
-                    
-                    let translatedText = translateResult.text
-                    placeholders.forEach((original, index) => {
-                        const pRegex = new RegExp(`\\[\\[\\s*${index}\\s*\\]\\]`, 'g')
-                        translatedText = translatedText.replace(pRegex, original)
-                    })
-
-                    const finalContent = isTranslated
-                                ? (isImmersive
-                                    ? `${messageContent}${separator}${translatedText.trim()} \`[en]\``
-                                    : `${translatedText.trim()} \`[en]\``)
-                                : (existingCachedObject as object)[messageId]
-                    FluxDispatcher.dispatch({
-                        type: "MESSAGE_UPDATE",
-                        message: {
-                            id: messageId,
-                            channel_id: originalMessage.channel_id,
-                            guild_id: ChannelStore.getChannel(originalMessage.channel_id)?.guild_id,
-                            content: finalContent,
-                        },
-                        log_edit: false,
-                        otherPluginBypass: true
-                    })
-
-                    isTranslated
-                        ? cachedData.unshift({ [messageId]: messageContent })
-                        : cachedData = cachedData.filter((e: any) => e !== existingCachedObject)
-                } catch (e) {
-                    showToast("Failed to translate message.", getAssetIDByName("Small"))
-                    logger.error(e)
+                const buttons = findInReactTree(component, (x: any) => x?.[0]?.type?.name === "ActionSheetRow")
+                if (!buttons) {
+                    console.log("TranslateButtons: No buttons found")
+                    return
                 }
-            }
 
-            buttons.splice(position, 0, (
-                <ActionSheetRow
-                    label={`${translateType} Message`}
-                    icon={
-                        <ActionSheetRow.Icon
-                            source={icon}
-                            IconComponent={() => (
-                                <ReactNative.Image
-                                    resizeMode="cover"
-                                    style={styles.iconComponent}
-                                    source={icon}
-                                />
-                            )}
-                        />
+                const position = Math.max(buttons.findIndex((x: any) => x.props.message === i18n.Messages.MARK_UNREAD), 0)
+
+                const originalMessage = MessageStore.getMessage(message.channel_id, message.id)
+                if (!originalMessage?.content && !message.content) return
+
+                const messageId = originalMessage?.id ?? message.id
+                const messageContent = originalMessage?.content ?? message.content
+                
+                const existingCached = cachedData.find((o: any) => Object.keys(o)[0] === messageId)
+                const translateType = existingCached ? "Revert" : "Translate"
+                const icon = translateType === "Translate" 
+                    ? getAssetIDByName("LanguageIcon") 
+                    : getAssetIDByName("ic_highlight")
+
+                const doTranslate = async () => {
+                    LazyActionSheet.hideActionSheet()
+                    
+                    try {
+                        console.log("TranslateButtons: Translating message...")
+                        const isTranslated = translateType === "Translate"
+                        const isImmersive = settings.immersive_enabled
+                        
+                        if (!originalMessage) return
+
+                        const result = await GTranslate.translate(messageContent, "auto", targetLang, !isTranslated)
+                        
+                        const finalContent = isTranslated
+                            ? (isImmersive
+                                ? `${messageContent}${separator}${result.text.trim()} \`[en]\``
+                                : `${result.text.trim()} \`[en]\``)
+                            : (existingCached as any)[messageId]
+
+                        FluxDispatcher.dispatch({
+                            type: "MESSAGE_UPDATE",
+                            message: {
+                                id: messageId,
+                                channel_id: originalMessage.channel_id,
+                                guild_id: ChannelStore.getChannel(originalMessage.channel_id)?.guild_id,
+                                content: finalContent,
+                            },
+                            log_edit: false,
+                            otherPluginBypass: true
+                        })
+
+                        if (isTranslated) {
+                            cachedData.unshift({ [messageId]: messageContent })
+                        } else {
+                            const idx = cachedData.findIndex((e: any) => e !== existingCached)
+                            if (idx > -1) cachedData.splice(idx, 1)
+                        }
+                        
+                        console.log("TranslateButtons: Translation done")
+                    } catch (e) {
+                        console.log("TranslateButtons: Translation error:", e?.message || e)
+                        showToast("Translation failed", getAssetIDByName("Small"))
                     }
-                    onPress={translate}
-                />
-            ))
+                }
+
+                const translateButton = React.createElement(ActionSheetRow, {
+                    label: `${translateType} Message`,
+                    icon: React.createElement(ActionSheetRow.Icon, {
+                        source: icon,
+                        IconComponent: () => React.createElement(ReactNative.Image, {
+                            resizeMode: "cover",
+                            style: styles.iconComponent,
+                            source: icon
+                        })
+                    }),
+                    onPress: doTranslate
+                })
+
+                buttons.splice(position, 0, translateButton)
+            })
         })
     })
-})
+}

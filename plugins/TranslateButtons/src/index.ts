@@ -6,18 +6,25 @@ export const settings: {
     immersive_enabled?: boolean
 } = storage
 
-settings.immersive_enabled ??= true
+if (settings.immersive_enabled === undefined) {
+    settings.immersive_enabled = true
+}
 
-let patches: any[] = []
+let unpatchActionSheet: any = null
 
 export default {
     onLoad: () => {
-        patches = [patchActionSheet()]
+        console.log("TranslateButtons: Loading...")
+        try {
+            unpatchActionSheet = patchActionSheet()
+            console.log("TranslateButtons: Loaded OK")
+        } catch (e) {
+            console.log("TranslateButtons: Error loading patch:", e?.message || e)
+        }
     },
     onUnload: () => { 
-        for (const unpatch of patches) {
-            if (unpatch) unpatch()
-        }
+        console.log("TranslateButtons: Unloading...")
+        if (unpatchActionSheet) unpatchActionSheet()
     },
     settings: Settings
 }
