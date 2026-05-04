@@ -13,12 +13,10 @@ jobs:
         steps:
             - uses: actions/checkout@v3
 
-            - name: Copy additional files
+            - name: Create 404 page
               run: |
-                  cp README.md README.md.bak
                   printf -- "---\npermalink: /404.html\n---\n" > 404.md
-                  printf -- "> **Note:** You accessed a link that returned a 404, probably by clicking one of the plugin links. You're supposed to copy the link address and add it into Vendetta.\n\n" >> 404.md
-                  cat README.md >> 404.md
+                  printf -- "> **Note:** You accessed a link that returned a 404. Copy the link address and add it into Vendetta.\n\n" >> 404.md
 
             - name: Deploy to GitHub Pages
               uses: peaceiris/actions-gh-pages@v3
@@ -26,3 +24,4 @@ jobs:
                   github_token: ${{ secrets.GITHUB_TOKEN }}
                   publish_dir: .
                   enable_jekyll: true
+                  exclude_assets: '.git,.github'
