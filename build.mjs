@@ -61,6 +61,12 @@ for (const dirent of pluginFolders) {
 
   const bundle = await rollup({
     input: join(pluginPath, entry),
+    external: (id) => {
+      if (id.startsWith("@vendetta")) return true;
+      if (id.startsWith("ApplicationCommandTypes")) return true;
+      if (id.startsWith("react-native")) return true;
+      return false;
+    },
     onwarn: () => {},
     plugins,
   });
