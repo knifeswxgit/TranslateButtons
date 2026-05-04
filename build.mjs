@@ -41,7 +41,9 @@ for (const dirent of pluginFolders) {
       esbuild({
         minify: false,
         target: "es2020",
-        jsx: "react",
+        jsx: "transform",
+        jsxFactory: "React.createElement",
+        jsxFragment: "React.Fragment",
       }),
     ],
     onwarn(warning, warn) {
