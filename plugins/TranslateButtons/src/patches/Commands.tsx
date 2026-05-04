@@ -10,8 +10,11 @@ import { findByProps } from "@vendetta/metro"
 import { GTranslate } from "../api"
 
 const ClydeUtils = findByProps("sendBotMessage")
+if (!ClydeUtils) logger.warn("TranslateButtons: ClydeUtils not found")
 
-export default () => registerCommand({
+export default () => {
+    logger.info("TranslateButtons: Registering /tswx command")
+    return registerCommand({
     name: "tswx",
     displayName: "tswx",
     description: "Translate text to English",
@@ -46,7 +49,7 @@ export default () => registerCommand({
             }))
         } catch (e) {
             logger.error(e)
-            return ClydeUtils.sendBotMessage(ctx.channel.id, "Failed to translate.")
+            return ClydeUtils?.sendBotMessage(ctx.channel.id, "Failed to translate.")
         }
     }
-})
+})}

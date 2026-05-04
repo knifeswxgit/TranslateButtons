@@ -12,6 +12,7 @@ import { showToast } from "@vendetta/ui/toasts"
 import { logger } from "@vendetta"
 
 const LazyActionSheet = findByProps("openLazy", "hideActionSheet")
+if (!LazyActionSheet) logger.warn("TranslateButtons: LazyActionSheet not found")
 const ActionSheetRow = findByProps("ActionSheetRow")?.ActionSheetRow ?? Forms.FormRow
 const MessageStore = findByStoreName("MessageStore")
 const ChannelStore = findByStoreName("ChannelStore")
